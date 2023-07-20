@@ -1,5 +1,7 @@
 package com.cleanroommc.groovyscript.event;
 
+
+import java.util.concurrent.ConcurrentHashMap;
 import com.cleanroommc.groovyscript.GroovyScript;
 import com.cleanroommc.groovyscript.api.GroovyLog;
 import com.cleanroommc.groovyscript.compat.loot.Loot;
@@ -11,7 +13,6 @@ import com.cleanroommc.groovyscript.compat.vanilla.Player;
 import com.cleanroommc.groovyscript.compat.vanilla.VanillaModule;
 import com.cleanroommc.groovyscript.core.mixin.InventoryCraftingAccess;
 import com.cleanroommc.groovyscript.core.mixin.SlotCraftingAccess;
-import com.cleanroommc.groovyscript.sandbox.ClosureHelper;
 import groovy.lang.Closure;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,14 +24,15 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+@Mod.EventBusSubscriber
 public class EventHandler {
+
+    public static ConcurrentHashMap<String, LootTable> TABLES = new ConcurrentHashMap<>();
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
@@ -98,11 +100,11 @@ public class EventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onTableLoad(LootTableLoadEvent event) {
-        if (!Loot.TABLES.containsKey(event.getName())) {
-            Loot.TABLES.put(event.getName(), event.getTable());
+        if (!TABLES.containsKey(event.getName())) {
+            TABLES.put(event.getName(), event.getTable());
         } else {
-            Loot.TABLES.get(event.getName()).freeze();
-            event.setTable(Loot.TABLES.get(event.getName()));
+            TABLES.get(event.getName()).freeze();
+            event.setTable(TABLES.get(event.getName()));
         }
     }
 }
